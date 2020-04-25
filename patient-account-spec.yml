@@ -2,6 +2,8 @@ openapi: 3.0.1
 info:
   title: Patient-Account
   description: Patient account specification to define the patient account API
+  contact:
+    email: scubatoy@gmail.com  
   version: 1.0
 servers:
   - url: http://localhost:8080/v1
