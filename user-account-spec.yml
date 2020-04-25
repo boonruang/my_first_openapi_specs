@@ -1,0 +1,239 @@
+openapi: 3.0.1
+info:
+  title: User-Account
+  description: User account specification to define the user account API
+  version: 1.0
+servers:
+  - url: http://localhost:8080/v1
+    description: Developer server
+  - url: http://localhost/v1
+    description: Production server
+tags:
+  - name: users
+    description: User Acount    
+paths:
+  /users:
+    get:
+      summary: Retrieve all users.
+      tags:
+        - users
+      security:
+        - BearerAuth
+      operationId: getAllUsers
+      responses:
+        200:  
+          $ref: '#/components/responses/SuccessGetAll'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'       
+  /user:
+    post:
+      summary: Create a new user.
+      tags:
+        - users
+      security:
+        - BearerAuth
+      operationId: createUserAccount
+      requestBody:
+        $ref: '#/components/requestBody/userBody'
+      responses:
+        201:  
+          $ref: '#/components/responses/Created'
+        400:
+          $ref: '#/components/responses/BadRequest'          
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/ServerError'                
+  /user/{id}:
+    get:
+      summary: Get a user by ID.
+      tags:
+        - users
+      security:
+        - BearerAuth
+      operationId: getUserByID
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:  
+          $ref: '#/components/responses/Success'
+        401:
+          $ref: '#/components/responses/Unauthorized'          
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/ServerError'               
+    put:
+      summary: Update a user by ID.
+      tags:
+        - users
+      security:
+        - BearerAuth
+      operationId: UserByID
+      requestBody:
+        $ref: '#/components/requestBody/userBody'      
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64            
+      responses:
+        202:  
+          $ref: '#/components/responses/Accepted'
+        400:
+          $ref: '#/components/responses/BadRequest'               
+        401:
+          $ref: '#/components/responses/Unauthorized'          
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/ServerError'       
+    delete:
+      summary: Delete a user by ID.
+      tags:
+        - users
+      security:
+        - BearerAuth
+      operationId: deleteUserByID
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64            
+      responses:
+        204:  
+          description: No connect
+        401:
+          $ref: '#/components/responses/Unauthorized'          
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/ServerError'               
+components:
+  schemas:
+    requestBody:
+      required:
+      - email
+      - password
+      type: object    
+      properties:
+        email:
+          type: string
+          format: email
+          pattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+          minLength: 10
+          example: 'support@vpano360.com'
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: 'P@ssw0rd'
+    body_response_error:
+      required:
+        - code_error
+        - message
+      type:
+        object
+      properties:
+        code_error:
+          type: integer
+          format: int64
+          example: 123
+        message:
+          type: string
+          example: message_to_show_from_server
+    user:
+      required:
+        - id
+        - email
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        email:
+          type: string
+          format: email
+          pattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+          minLength: 10
+          example: 'support@vpano360.com'
+  requestBody:
+    userBody:
+      description: User JSON object required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestBody'        
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/body_response_error'     
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/body_response_error'       
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/body_response_error'   
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/body_response_error'  
+    Accepted:
+      description: Accepted
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/user'                
+    Success:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/user'             
+    Created:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/user'                        
+    SuccessGetAll:
+      description: Ok
+      content:
+        application/json:
+          schema:
+             type: array
+             items:
+              oneOf:
+                - $ref: '#/components/schemas/user'  
+                - $ref: '#/components/schemas/user'  
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: Bearer
+      bearerFormat: JWT

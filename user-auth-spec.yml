@@ -1,0 +1,128 @@
+openapi: 3.0.1
+info:
+  title: Authentication
+  description: User authentication specification to define the user log in API
+  version: 1.0
+servers:
+  - url: http://localhost:8080/v1
+    description: Developer server
+  - url: http://localhost/v1
+    description: Production server
+tags:
+  - name: auth
+    description: User authentication
+paths:
+  /login:
+    post:
+      summary: Authentication of the user.
+      tags:
+        - auth
+      operationId: loginUser
+      requestBody:
+        $ref: '#/components/requestBody/userBody'      
+      responses:
+        200:  
+          $ref: '#/components/responses/Success'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/ServerError'           
+components:
+  schemas:
+    tokenBody:
+      required:
+        - scope
+        - expiresIn
+        - refreshToken
+        - accessToken
+        - developerEmail
+      type: object    
+      properties:    
+        scope:
+          type: string
+          example: read, write
+        expiresIn:
+          type: string
+          format: int64
+          example: 3600000
+        refreshToken:
+          type: string
+          format: byte
+          example: 45445649023rksdu092134j1239ifakldfs
+        accessToken:
+          type: string
+          format: byte
+          example: 45445649023rksdu092134j1239ifakldfs        
+        developerEmail:
+          type: string
+          format: email
+          example: 'support@vpano360.com'        
+    requestBody:
+      required:
+      - email
+      - password
+      type: object    
+      properties:
+        email:
+          type: string
+          format: email
+          pattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+          minLength: 10
+          example: 'support@vpano360.com'
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: 'P@ssw0rd'  
+    body_response_error:
+      required:
+        - code_error
+        - message
+      type:
+        object
+      properties:
+        code_error:
+          type: integer
+          format: int64
+          example: 123
+        message:
+          type: string
+          example: message_to_show_from_server
+  requestBody:
+    userBody:
+      description: User JSON object required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestBody'                
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/body_response_error'   
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/body_response_error'                     
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/body_response_error'   
+    Success:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/tokenBody'  
+    BearerAuth:
+      type: http
+      scheme: Bearer
+      bearerFormat: JWT
