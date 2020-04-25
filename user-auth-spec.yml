@@ -2,6 +2,8 @@ openapi: 3.0.1
 info:
   title: Authentication
   description: User authentication specification to define the user log in API
+  contact:
+    email: scubatoy@gmail.com  
   version: 1.0
 servers:
   - url: http://localhost:8080/v1
